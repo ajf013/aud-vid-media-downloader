@@ -6,406 +6,439 @@
   <title>ReClip — Free Media Downloader</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4f1eb;
-      --fg: #3a3a38;
-      --accent: #e85d2a;
-      --accent-hover: #d04e1f;
-      --muted: #9c9889;
-      --card: #fff;
-      --card-border: #e2ded6;
-      --success: #2d8a4e;
-      --error: #c43d3d;
-      --radius: 14px;
-      --shimmer: linear-gradient(90deg, #ebe8e2 25%, #f0ede7 50%, #ebe8e2 75%);
+      --radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    [data-theme='dark'] {
+      --bg: #0f1115;
+      --fg: #eef1f5;
+      --accent: #f09c00;
+      --accent-hover: #d18700;
+      --muted: #8a8f98;
+      --card: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --success: #2d8a4e;
+      --error: #c43d3d;
+      --glass: rgba(255, 255, 255, 0.02);
+      --glass-hover: rgba(255, 255, 255, 0.05);
+      --shimmer: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+      --shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    [data-theme='light'] {
+      --bg: #f8f9fa;
+      --fg: #1a1a1a;
+      --accent: #f09c00;
+      --accent-hover: #e08b00;
+      --muted: #6c757d;
+      --card: #ffffff;
+      --card-border: #e9ecef;
+      --success: #28a745;
+      --error: #dc3545;
+      --glass: #ffffff;
+      --glass-hover: #f1f3f5;
+      --shimmer: linear-gradient(90deg, #f1f3f5 25%, #e9ecef 50%, #f1f3f5 75%);
+      --shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
     body {
-      font-family: 'DM Mono', monospace;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--fg);
       min-height: 100vh;
       overflow-x: hidden;
+      line-height: 1.5;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* Ambient Background blobs */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 40%;
+      height: 40%;
+      background: radial-gradient(circle, rgba(240, 156, 0, 0.05) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
     }
 
     body::after {
       content: '';
       position: fixed;
-      inset: 0;
-      opacity: 0.03;
+      bottom: -10%;
+      right: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(240, 156, 0, 0.03) 0%, transparent 70%);
+      filter: blur(100px);
+      z-index: -1;
       pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 128px;
     }
 
     .page {
-      max-width: 620px;
+      max-width: 680px;
       margin: 0 auto;
-      padding: 60px 24px 80px;
+      padding: 80px 24px 100px;
     }
 
-    .brand { margin-bottom: 48px; }
+    .brand { margin-bottom: 60px; text-align: center; }
     .brand h1 {
-      font-family: 'Instrument Serif', serif;
-      font-size: 4.2rem;
-      font-weight: 400;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      color: var(--fg);
+      font-family: 'Outfit', sans-serif;
+      font-size: 5rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 0.9;
+      background: linear-gradient(135deg, white 30%, var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
     }
-    .brand h1 em { font-style: italic; color: var(--accent); }
     .brand p {
-      margin-top: 10px;
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       color: var(--muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .input-wrap {
+      background: var(--glass);
+      border: 1px solid var(--card-border);
+      padding: 10px;
+      border-radius: var(--radius);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      margin-bottom: 40px;
+      transition: var(--transition);
+    }
+    .input-wrap:focus-within {
+      border-color: rgba(240, 156, 0, 0.3);
+      transform: translateY(-2px);
     }
 
     textarea {
       width: 100%;
-      padding: 18px 20px;
-      border: 1.5px solid var(--card-border);
-      border-radius: var(--radius);
-      background: var(--card);
+      padding: 20px;
+      border: none;
+      background: transparent;
       color: var(--fg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
       outline: none;
       resize: none;
-      min-height: 56px;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      margin-bottom: 6px;
+      min-height: 60px;
     }
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(232, 93, 42, 0.08);
-    }
-    textarea::placeholder { color: var(--muted); }
+    textarea::placeholder { color: var(--muted); opacity: 0.6; }
 
     .hint {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: var(--muted);
-      margin-bottom: 20px;
-      letter-spacing: 0.02em;
+      margin: 12px 10px 20px;
+      opacity: 0.7;
     }
 
     .controls {
       display: flex;
-      gap: 10px;
-      margin-bottom: 6px;
+      gap: 12px;
+      padding: 0 10px;
       align-items: center;
     }
     .pill-group {
       display: flex;
-      border: 1.5px solid var(--card-border);
-      border-radius: 10px;
-      overflow: hidden;
-      background: var(--card);
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 4px;
+      transition: var(--transition);
     }
     .pill {
-      padding: 9px 18px;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.76rem;
+      padding: 10px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
       border: none;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 8px;
+      letter-spacing: 0.02em;
     }
-    .pill.active { background: var(--fg); color: var(--bg); }
-    .pill:not(.active):hover { color: var(--fg); }
+    .pill.active { background: var(--accent); color: #000; }
+    .pill:not(.active):hover { color: var(--fg); background: rgba(255,255,255,0.05); }
 
     .fetch-btn {
       flex: 1;
-      padding: 10px 20px;
+      padding: 14px 24px;
       border: none;
-      border-radius: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
+      border-radius: 12px;
+      background: var(--fg);
+      color: var(--bg);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 0.04em;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .fetch-btn:hover { background: var(--accent-hover); }
-    .fetch-btn:active { transform: scale(0.98); }
-    .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .fetch-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    .fetch-btn:active { transform: scale(0.96); }
+    .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
     /* Cards */
-    .cards { margin-top: 24px; }
+    .cards { margin-top: 40px; }
 
     .card {
       display: flex;
-      gap: 14px;
-      border: 1.5px solid var(--card-border);
+      gap: 20px;
+      border: 1px solid var(--card-border);
       border-radius: var(--radius);
-      background: var(--card);
-      padding: 14px;
-      margin-bottom: 10px;
-      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      background: var(--glass);
+      padding: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .card:hover { border-color: rgba(255, 255, 255, 0.2); background: var(--glass-hover); }
 
     .card-thumb {
-      width: 120px;
-      min-width: 120px;
-      height: 80px;
-      border-radius: 8px;
+      width: 150px;
+      min-width: 150px;
+      height: 100px;
+      border-radius: 12px;
       overflow: hidden;
-      background: var(--card-border);
+      background: rgba(255,255,255,0.05);
       flex-shrink: 0;
       position: relative;
     }
-    .card-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    /* No-thumbnail icon */
-    .card-thumb .no-thumb {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-    }
-    .card-thumb .no-thumb svg {
-      width: 28px;
-      height: 28px;
-      opacity: 0.5;
-    }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card-thumb .no-thumb { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+    .card-thumb .no-thumb i { font-size: 2rem; opacity: 0.4; }
 
-    /* Shimmer skeleton for loading state */
-    .card-thumb.loading {
-      background: var(--shimmer);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-    .skeleton-line {
-      height: 12px;
-      border-radius: 4px;
-      background: var(--shimmer);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      margin-bottom: 6px;
-    }
-    .skeleton-line.short { width: 40%; height: 10px; }
+    /* Shimmer skeleton */
+    .card-thumb.loading { background: var(--shimmer); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .skeleton-line { height: 14px; border-radius: 6px; background: var(--shimmer); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 8px; }
+    .skeleton-line.short { width: 40%; }
     .skeleton-line.medium { width: 75%; }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    .card-body {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .card-title {
-      font-family: 'Instrument Serif', serif;
-      font-size: 1rem;
-      line-height: 1.3;
-      color: var(--fg);
-      margin-bottom: 2px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .card-meta {
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
+    .card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .card-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 500; color: var(--fg); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
 
-    .card-actions {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+    .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
     .card-dl-btn {
-      padding: 6px 14px;
+      padding: 8px 18px;
       border: none;
-      border-radius: 7px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 500;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.03em;
+      transition: all 0.25s;
       text-transform: uppercase;
     }
-    .card-dl-btn:hover { background: #2d2d2a; }
-    .card-dl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .card-dl-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+    .card-dl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .card-dl-btn.done { background: var(--success); color: #fff; }
     .card-dl-btn.error { background: var(--error); color: #fff; }
 
-    .card-status {
-      font-size: 0.68rem;
-      color: var(--muted);
-    }
+    .card-status { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
     .card-status.downloading { color: var(--accent); }
-    .card-status.done { color: var(--success); }
-    .card-status.error { color: var(--error); }
 
     .q-chip {
-      padding: 4px 10px;
-      border: 1.5px solid var(--card-border);
-      border-radius: 6px;
-      background: transparent;
+      padding: 5px 12px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
       color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.65rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .q-chip.active {
-      border-color: var(--fg);
-      color: var(--fg);
-      background: rgba(26,26,24,0.04);
-    }
-    .q-chip:hover:not(.active) { border-color: var(--muted); }
+    .q-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(240,156,0,0.05); }
+    .q-chip:hover:not(.active) { border-color: rgba(255,255,255,0.2); }
 
-    /* Error card */
-    .card.card-error {
-      border-color: rgba(196, 61, 61, 0.2);
-      background: rgba(196, 61, 61, 0.03);
+    .dl-all-bar { display: flex; gap: 12px; margin-top: 24px; }
+    .dl-all-btn {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: var(--fg);
+      color: var(--bg);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      box-shadow: var(--shadow);
     }
-    .card-error-icon {
-      width: 100%;
-      height: 100%;
+    .dl-all-btn:hover { background: #fff; transform: translateY(-4px); }
+
+    /* Footer styles */
+    .footer_content {
+        text-align: center;
+        color: var(--accent);
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    .footer_main {
+        padding: 80px 24px 50px;
+        margin-top: 60px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .footer_Icons {
+        text-align: center;
+        padding-bottom: 24px;
+    }
+
+    .footer_Icons span {
+        margin: 0 12px;
+        display: inline-block;
+    }
+
+    .footer_Icons a {
+        color: var(--muted);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: inline-block;
+    }
+    
+    .footer_Icons .footer_git a:hover { color: #fff; transform: scale(1.3) translateY(-4px); }
+    .footer_Icons .footer_link a:hover { color: #0077b5; transform: scale(1.3) translateY(-4px); }
+    .footer_Icons .footer_insta a:hover { color: #e4405f; transform: scale(1.3) translateY(-4px); }
+    .footer_Icons .footer_wht a:hover { color: #25d366; transform: scale(1.3) translateY(-4px); }
+    .footer_Icons .footer_twi a:hover { color: #fff; transform: scale(1.3) translateY(-4px); }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--glass);
+      border: 1px solid var(--card-border);
+      color: var(--fg);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(196, 61, 61, 0.08);
-      color: var(--error);
+      cursor: pointer;
+      z-index: 1000;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
-    .card-error-icon svg {
-      width: 24px;
-      height: 24px;
+    .theme-toggle:hover {
+      transform: scale(1.1) rotate(15deg);
+      background: var(--glass-hover);
+      border-color: var(--accent);
     }
-    .card-error-msg {
-      font-size: 0.72rem;
-      color: var(--error);
-      margin-top: 2px;
-      line-height: 1.4;
+    .theme-toggle i { font-size: 1.2rem; }
+
+    [data-theme='light'] body::before, 
+    [data-theme='light'] body::after { opacity: 0.6; }
+
+    /* Progress Bar */
+    .progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 4px;
+      position: relative;
     }
-    .card-error-url {
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
       font-size: 0.65rem;
       color: var(--muted);
-      word-break: break-all;
       margin-top: 4px;
+      font-weight: 600;
     }
 
-    /* Download all bar */
-    .dl-all-bar {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .dl-all-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: var(--fg);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .dl-all-btn:hover { background: #2d2d2a; }
-    .dl-all-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .spin {
-      display: inline-block;
-      width: 10px; height: 10px;
-      border: 2px solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .footer {
-      margin-top: 48px;
-      text-align: center;
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      line-height: 1.8;
-    }
-
-    /* Mobile */
     @media (max-width: 500px) {
-      .brand h1 { font-size: 3rem; }
+      .brand h1 { font-size: 3.5rem; }
       .page { padding: 40px 16px 60px; }
-      .card { flex-direction: column; gap: 10px; }
-      .card-thumb {
-        width: 100%;
-        min-width: unset;
-        height: 160px;
-      }
+      .card { flex-direction: column; gap: 12px; }
+      .card-thumb { width: 100%; height: 180px; }
       .card-title { white-space: normal; }
-      .controls { flex-wrap: wrap; }
-      .fetch-btn { width: 100%; }
+      .controls { flex-direction: column; }
+      .pill-group, .fetch-btn { width: 100%; }
     }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+    <i class="fa-solid fa-moon"></i>
+  </button>
   <div class="page">
     <div class="brand">
-      <h1>Re<em>Clip</em></h1>
-      <p>Free media downloader</p>
+      <h1>ReClip</h1>
+      <p>Premium Media Downloader</p>
     </div>
 
-    <textarea id="urls" placeholder="Paste one or more URLs..." rows="2"></textarea>
-    <p class="hint">Multiple links? Separate with spaces, commas, or newlines.</p>
-
-    <div class="controls">
-      <div class="pill-group">
-        <button class="pill active" data-format="video" onclick="setFormat(this)">MP4</button>
-        <button class="pill" data-format="audio" onclick="setFormat(this)">MP3</button>
+    <div class="input-wrap">
+      <textarea id="urls" placeholder="Paste one or more URLs..." rows="2"></textarea>
+      <div class="controls">
+        <div class="pill-group">
+          <button class="pill active" data-format="video" onclick="setFormat(this)">MP4</button>
+          <button class="pill" data-format="audio" onclick="setFormat(this)">MP3</button>
+        </div>
+        <button class="fetch-btn" id="goBtn" onclick="go()">Fetch Content</button>
       </div>
-      <button class="fetch-btn" id="goBtn" onclick="go()">Fetch</button>
     </div>
+    <p class="hint">Multiple links? Separate with spaces, commas, or newlines.</p>
 
     <div id="cards" class="cards"></div>
 
-    <div class="footer">
-      YouTube &middot; TikTok &middot; Instagram &middot; Twitter/X &middot; Reddit &middot; Facebook<br>
-      Vimeo &middot; Twitch &middot; Dailymotion &middot; SoundCloud &middot; Loom &middot; Streamable<br>
-      Pinterest &middot; Tumblr &middot; Threads &middot; LinkedIn &middot; 1000+ more
+    <div data-aos="fade-up" class="footer_main">
+        <div class="footer_Icons">
+            <span class="footer_git"><a target="_blank" rel="noreferrer noopener" href="https://github.com/ajf013"><i class="fa-brands fa-github fa-2x"></i></a></span>
+            <span class="footer_link"><a target="_blank" rel="noreferrer noopener" href="https://www.linkedin.com/in/ajf013-francis-cruz/"><i class="fa-brands fa-linkedin fa-2x"></i></a></span>
+            <span class="footer_insta"><a target="_blank" rel="noreferrer noopener" href="https://www.instagram.com/fcruz_013/"><i class="fa-brands fa-instagram fa-2x"></i></a></span>
+            <span class="footer_wht"><a target="_blank" rel="noreferrer noopener" href="https://api.whatsapp.com/send?phone=916379649461"><i class="fa-brands fa-whatsapp fa-2x"></i></a></span>
+            <span class="footer_twi"><a target="_blank" rel="noreferrer noopener" href="https://x.com/Itsme_Ajf013" aria-label="X (formerly Twitter)">
+                <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 26px; height: 26px; fill: currentColor; vertical-align: middle; margin-top: -3px;">
+                    <g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g>
+                </svg>
+            </a></span>
+        </div>
+        <div class="footer_content">
+            <span>Copyrights <i class="fa-regular fa-copyright"></i> <span id="current-year"></span> <strong>Francis Cruz</strong></span>
+        </div>
     </div>
   </div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
   <script>
     let currentFormat = 'video';
@@ -550,11 +583,11 @@
 
       let thumbHtml;
       if (isAudio) {
-        thumbHtml = `<div class="no-thumb" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+        thumbHtml = `<div class="no-thumb" style="color:var(--accent)"><i class="fa-solid fa-play"></i></div>`;
       } else if (c.thumbnail) {
         thumbHtml = `<img src="${c.thumbnail}" alt="">`;
       } else {
-        thumbHtml = `<div class="no-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>`;
+        thumbHtml = `<div class="no-thumb"><i class="fa-regular fa-image"></i></div>`;
       }
 
       let qualityChips = '';
@@ -568,7 +601,18 @@
       if (c.status === 'ready') {
         actionHtml = `<button class="card-dl-btn" onclick="dlCard(${idx})">Download</button>${qualityChips}`;
       } else if (c.status === 'downloading') {
-        actionHtml = `<span class="card-status downloading"><span class="spin"></span> Downloading...</span>`;
+        const progress = c.progress || 0;
+        actionHtml = `
+          <div style="width: 100%">
+            <div class="progress-wrap">
+              <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <div class="progress-text">
+              <span>${progress.toFixed(1)}% · ${c.speed || '0 B/s'}</span>
+              <span>ETA: ${c.eta || '--:--'}</span>
+            </div>
+          </div>
+        `;
       } else if (c.status === 'done') {
         actionHtml = `<button class="card-dl-btn done" onclick="saveCard(${idx})">Save</button>
           <span class="card-status done">${esc(c.filename || '')}</span>`;
@@ -648,6 +692,11 @@
             c.filename = data.filename;
             renderCard(idx);
             saveCard(idx);
+          } else if (data.status === 'downloading') {
+            c.progress = data.progress;
+            c.speed = data.speed;
+            c.eta = data.eta;
+            renderCard(idx);
           } else if (data.status === 'error') {
             clearInterval(iv);
             c.status = 'error';
@@ -684,6 +733,35 @@
 
       if (btn) { btn.disabled = false; btn.textContent = 'Download All'; }
     }
+
+    // Initialize UI elements
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    AOS.init({ duration: 1000, once: true });
+
+    function initTheme() {
+      const saved = localStorage.getItem('reclip-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('reclip-theme', next);
+      updateThemeIcon(next);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.querySelector('.theme-toggle i');
+      if (theme === 'dark') {
+        icon.className = 'fa-solid fa-moon';
+      } else {
+        icon.className = 'fa-solid fa-sun';
+      }
+    }
+
+    initTheme();
   </script>
 </body>
 </html>

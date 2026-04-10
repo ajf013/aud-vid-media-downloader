@@ -4,6 +4,7 @@ import glob
 import json
 import subprocess
 import threading
+import re
 from flask import Flask, request, jsonify, send_file, render_template
 
 app = Flask(__name__)
@@ -15,9 +16,13 @@ jobs = {}
 
 def run_download(job_id, url, format_choice, format_id):
     job = jobs[job_id]
+    job["progress"] = 0
+    job["speed"] = "0 B/s"
+    job["eta"] = "--:--"
+    
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
 
-    cmd = ["yt-dlp", "--no-playlist", "-o", out_template]
+    cmd = ["yt-dlp", "--newline", "--no-playlist", "--progress", "-o", out_template]
 
     if format_choice == "audio":
         cmd += ["-x", "--audio-format", "mp3"]
@@ -29,10 +34,36 @@ def run_download(job_id, url, format_choice, format_id):
     cmd.append(url)
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-        if result.returncode != 0:
+        process = subprocess.Popen(
+            cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            text=True, 
+            bufsize=1, 
+            universal_newlines=True
+        )
+        
+        last_line = ""
+        for line in process.stdout:
+            last_line = line.strip()
+            # [download]  10.5% of 10.00MiB at  1.50MiB/s ETA 00:06
+            pct_match = re.search(r"(\d+\.\d+)%", line)
+            if pct_match:
+                job["progress"] = float(pct_match.group(1))
+            
+            speed_match = re.search(r"at\s+([\d\.]+\w+/s)", line)
+            if speed_match:
+                job["speed"] = speed_match.group(1)
+            
+            eta_match = re.search(r"ETA\s+([\d:]+)", line)
+            if eta_match:
+                job["eta"] = eta_match.group(1)
+
+        process.wait()
+
+        if process.returncode != 0:
             job["status"] = "error"
-            job["error"] = result.stderr.strip().split("\n")[-1]
+            job["error"] = last_line or "Download failed"
             return
 
         files = glob.glob(os.path.join(DOWNLOAD_DIR, f"{job_id}.*"))
@@ -57,6 +88,7 @@ def run_download(job_id, url, format_choice, format_id):
 
         job["status"] = "done"
         job["file"] = chosen
+        job["progress"] = 100
         ext = os.path.splitext(chosen)[1]
         title = job.get("title", "").strip()
         # Sanitize title for filename
@@ -65,9 +97,6 @@ def run_download(job_id, url, format_choice, format_id):
             job["filename"] = f"{safe_title}{ext}" if safe_title else os.path.basename(chosen)
         else:
             job["filename"] = os.path.basename(chosen)
-    except subprocess.TimeoutExpired:
-        job["status"] = "error"
-        job["error"] = "Download timed out (5 min limit)"
     except Exception as e:
         job["status"] = "error"
         job["error"] = str(e)
@@ -154,6 +183,9 @@ def check_status(job_id):
         "status": job["status"],
         "error": job.get("error"),
         "filename": job.get("filename"),
+        "progress": job.get("progress", 0),
+        "speed": job.get("speed", ""),
+        "eta": job.get("eta", ""),
     })
 
 
