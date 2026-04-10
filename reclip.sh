@@ -40,7 +40,7 @@ else
     source venv/bin/activate
 fi
 
-PORT="${PORT:-8899}"
+PORT="${PORT:-8080}"
 export PORT
 
 echo ""
