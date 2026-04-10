@@ -1,66 +1,61 @@
-# ReClip
+# ReClip — Premium Media Downloader
 
-A self-hosted, open-source video and audio downloader with a clean web UI. Paste links from YouTube, TikTok, Instagram, Twitter/X, and 1000+ other sites — download as MP4 or MP3.
+A state-of-the-art, self-hosted media downloader with a sleek web UI. Paste links from 1000+ sites and download as high-quality MP4 or MP3 with real-time feedback.
 
-![Python](https://img.shields.io/badge/python-3.8+-blue)
+![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Gunicorn](https://img.shields.io/badge/server-Gunicorn-orange)
 
-https://github.com/user-attachments/assets/419d3e50-c933-444b-8cab-a9724986ba05
+## ✨ New in Modern ReClip
 
-![ReClip MP3 Mode](assets/preview-mp3.png)
+- **🌓 Dual-Theme UI**: Seamlessly switch between a sophisticated Premium Dark mode and a clean, vibrant Light mode.
+- **📈 Live Progress Tracking**: Watch your downloads in real-time with progress bars, speed metrics (MiB/s), and ETA estimates.
+- **💎 Premium Design**: Built with glassmorphism, Outfit & Inter typography, and smooth AOS scroll animations.
+- **🚀 Production Ready**: Pre-configured with Gunicorn and Docker for professional-grade deployment.
+- **📱 Responsive & Social**: Mobile-first design with a custom footer for social integration.
 
-## Features
+## 🛠️ Tech Stack
 
-- Download videos from 1000+ supported sites (via [yt-dlp](https://github.com/yt-dlp/yt-dlp))
-- MP4 video or MP3 audio extraction
-- Quality/resolution picker
-- Bulk downloads — paste multiple URLs at once
-- Automatic URL deduplication
-- Clean, responsive UI — no frameworks, no build step
-- Single Python file backend (~150 lines)
+- **Backend:** Python 3.12 + Flask
+- **Production Server:** Gunicorn
+- **Frontend:** Vanilla HTML5, CSS3 (Glassmorphism), JavaScript (ES6+)
+- **Animations:** [AOS (Animate On Scroll)](https://michalsnik.github.io/aos/)
+- **Icons:** [Font Awesome 6](https://fontawesome.com/)
+- **Engine:** [yt-dlp](https://github.com/yt-dlp/yt-dlp) + [ffmpeg](https://ffmpeg.org/)
 
-## Quick Start
+## 🚀 Quick Start
 
+### Local Setup
 ```bash
-brew install yt-dlp ffmpeg    # or apt install ffmpeg && pip install yt-dlp
-git clone https://github.com/averygan/reclip.git
-cd reclip
+# Install dependencies
+brew install yt-dlp ffmpeg
+
+# Clone and run
+git clone https://github.com/ajf013/aud-vid-media-downloader.git
+cd aud-vid-media-downloader
 ./reclip.sh
 ```
-
 Open **http://localhost:8899**.
 
-Or with Docker:
-
+### Docker Deployment
 ```bash
-docker build -t reclip . && docker run -p 8899:8899 reclip
+docker build -t reclip .
+docker run -p 8899:8899 -e PORT=8899 reclip
 ```
 
-## Usage
+## 🚂 Deploy to Railway
 
-1. Paste one or more video URLs into the input box
-2. Choose **MP4** (video) or **MP3** (audio)
-3. Click **Fetch** to load video info and thumbnails
-4. Select quality/resolution if available
-5. Click **Download** on individual videos, or **Download All**
+This project is optimized for [Railway](https://railway.app). 
 
-## Supported Sites
+1. Push this code to your GitHub.
+2. Connect the repo to Railway.
+3. Railway will automatically build the `Dockerfile` and provide a public URL.
 
-Anything [yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), including:
+## 🤝 Supported Platforms
+Anything [yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md): YouTube, TikTok, Instagram, Twitter/X, LinkedIn, Reddit, and 1000+ more.
 
-YouTube, TikTok, Instagram, Twitter/X, Reddit, Facebook, Vimeo, Twitch, Dailymotion, SoundCloud, Loom, Streamable, Pinterest, Tumblr, Threads, LinkedIn, and many more.
+## ⚖️ Disclaimer
+This tool is for personal use only. Please respect the copyright and TOS of the platforms you use.
 
-## Stack
-
-- **Backend:** Python + Flask (~150 lines)
-- **Frontend:** Vanilla HTML/CSS/JS (single file, no build step)
-- **Download engine:** [yt-dlp](https://github.com/yt-dlp/yt-dlp) + [ffmpeg](https://ffmpeg.org/)
-- **Dependencies:** 2 (Flask, yt-dlp)
-
-## Disclaimer
-
-This tool is intended for personal use only. Please respect copyright laws and the terms of service of the platforms you download from. The developers are not responsible for any misuse of this tool.
-
-## License
-
+## 📄 License
 [MIT](LICENSE)
