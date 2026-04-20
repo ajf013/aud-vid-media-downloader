@@ -26,8 +26,8 @@ def run_download(job_id, url, format_choice, format_id):
     
     if os.path.exists("cookies.txt"):
         cmd += ["--cookies", "cookies.txt"]
-    else:
-        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+    
+    cmd += ["--extractor-args", "youtube:player_client=ios,android"]
 
 
     if format_choice == "audio":
@@ -124,8 +124,8 @@ def get_info():
     
     if os.path.exists("cookies.txt"):
         cmd += ["--cookies", "cookies.txt"]
-    else:
-        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+        
+    cmd += ["--extractor-args", "youtube:player_client=ios,android"]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
