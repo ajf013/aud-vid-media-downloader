@@ -23,6 +23,12 @@ def run_download(job_id, url, format_choice, format_id):
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
 
     cmd = ["yt-dlp", "--newline", "--no-playlist", "--progress", "-o", out_template]
+    
+    if os.path.exists("cookies.txt"):
+        cmd += ["--cookies", "cookies.txt"]
+    else:
+        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+
 
     if format_choice == "audio":
         cmd += ["-x", "--audio-format", "mp3"]
@@ -115,6 +121,12 @@ def get_info():
         return jsonify({"error": "No URL provided"}), 400
 
     cmd = ["yt-dlp", "--no-playlist", "-j", url]
+    
+    if os.path.exists("cookies.txt"):
+        cmd += ["--cookies", "cookies.txt"]
+    else:
+        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
