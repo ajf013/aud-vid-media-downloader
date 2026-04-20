@@ -22,12 +22,12 @@ def run_download(job_id, url, format_choice, format_id):
     
     out_template = os.path.join(DOWNLOAD_DIR, f"{job_id}.%(ext)s")
 
-    cmd = ["yt-dlp", "--newline", "--no-playlist", "--progress", "-o", out_template]
+    cmd = ["yt-dlp", "--no-colors", "--newline", "--no-playlist", "--progress", "-o", out_template]
     
     if os.path.exists("cookies.txt"):
-        cmd += ["--cookies", "cookies.txt"]
-    
-    cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+        cmd += ["--cookies", "cookies.txt", "--js-runtimes", "node"]
+    else:
+        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
 
 
     if format_choice == "audio":
@@ -53,7 +53,7 @@ def run_download(job_id, url, format_choice, format_id):
         for line in process.stdout:
             last_line = line.strip()
             # [download]  10.5% of 10.00MiB at  1.50MiB/s ETA 00:06
-            pct_match = re.search(r"(\d+\.\d+)%", line)
+            pct_match = re.search(r"([\d\.]+)%", line)
             if pct_match:
                 job["progress"] = float(pct_match.group(1))
             
@@ -123,9 +123,9 @@ def get_info():
     cmd = ["yt-dlp", "--no-playlist", "-j", url]
     
     if os.path.exists("cookies.txt"):
-        cmd += ["--cookies", "cookies.txt"]
-        
-    cmd += ["--extractor-args", "youtube:player_client=ios,android"]
+        cmd += ["--cookies", "cookies.txt", "--js-runtimes", "node"]
+    else:
+        cmd += ["--extractor-args", "youtube:player_client=ios,android"]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
